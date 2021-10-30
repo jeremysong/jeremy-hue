@@ -5,7 +5,7 @@ if (!state) {
     args = ['on'];
 }
 
-var Hue = require('philips-hue-api'),
+let Hue = require('philips-hue-api'),
     hue = Hue('http://192.168.4.35/api/nrY2S1lbZthmEJ3QwMfXuHpYzUC7wWrOk4Ex1dOL/');
 
 const LIGHT_NAMES = ["Kitchen 1", "Kitchen 2", "Task Lamp"]
