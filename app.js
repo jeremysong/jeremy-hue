@@ -2,7 +2,7 @@ let args = process.argv.slice(2);
 let state = args[0];
 if (!state) {
     // State state to "on" if it's undefined.
-    state = 'on';
+    args = ['on'];
 }
 
 var Hue = require('philips-hue-api'),
@@ -10,6 +10,33 @@ var Hue = require('philips-hue-api'),
 
 let lightNames = ["Kitchen 1", "Kitchen 2", "Task Lamp"]
 
-lightNames.forEach(name => {
-    hue.lights(name)[state]();
-});
+let controlLights = function(command, args) {
+    lightNames.forEach(name => {
+        hue.lights(name)[command](args);
+    })
+}
+
+function sleep(ms) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });
+}
+
+async function executeSequence() {
+    for (let arg of args) {
+        if (arg.startsWith('sleep')) {
+            console.log("Sleeping...");
+            await sleep(arg.split(':')[1]);
+        } else {
+            console.log(arg);
+            let command = arg.split(':')[0];
+            let value = arg.split(':')[1];
+            if (parseInt(value, 10)) {
+                value = parseInt(value, 10);
+            }
+            controlLights(command, value);
+        }
+    }
+}
+
+executeSequence();
