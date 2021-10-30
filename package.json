@@ -1,0 +1,14 @@
+{
+  "name": "jeremy-hue",
+  "version": "1.0.0",
+  "description": "Control Philips Hue lights at Jeremy's home",
+  "main": "app.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "Jeremy Song",
+  "license": "MIT",
+  "dependencies": {
+    "philips-hue-api": "^0.1.6"
+  }
+}
