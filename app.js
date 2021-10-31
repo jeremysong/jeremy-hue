@@ -38,7 +38,7 @@ function randomSequence() {
     }
     seq.push("brightness:254");
     seq.push("hue:34000");
-    seq.push("saturation:254");
+    seq.push("saturation:0");
     return seq;
 }
 
