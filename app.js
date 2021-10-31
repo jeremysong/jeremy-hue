@@ -1,20 +1,45 @@
-let args = process.argv.slice(2);
-let state = args[0];
-if (!state) {
+const LIGHT_NAMES = ["Kitchen 1", "Kitchen 2", "Task Lamp"]
+const DEFAULT_SEQUENCE = ["on"]
+
+let argv = require('yargs').argv;
+
+let sequence =  argv.seq ? argv.seq.split(/\s+/) : undefined;
+if (!sequence) {
     // State state to "on" if it's undefined.
-    args = ['on'];
+    sequence = DEFAULT_SEQUENCE;
 }
 
-let Hue = require('philips-hue-api'),
-    hue = Hue('http://192.168.4.35/api/nrY2S1lbZthmEJ3QwMfXuHpYzUC7wWrOk4Ex1dOL/');
+if (argv.random) {
+    sequence = randomSequence();
+}
+console.log(sequence);
 
-const LIGHT_NAMES = ["Kitchen 1", "Kitchen 2", "Task Lamp"]
+let lights = argv.lights ? argv.lights.split(/\s+/) : undefined;
+if (!lights) {
+    lights = LIGHT_NAMES;
+}
+console.log(lights);
+
+let hue = require('philips-hue-api')('http://192.168.4.35/api/nrY2S1lbZthmEJ3QwMfXuHpYzUC7wWrOk4Ex1dOL/');
 
 let controlLights = function(command, args) {
-    LIGHT_NAMES
-.forEach(name => {
+    lights.forEach(name => {
         hue.lights(name)[command](args);
     })
+}
+
+function randomSequence() {
+    let seq = [];
+    for (let i of Array(20)) {
+        seq.push(`hue:${Math.floor(Math.random() * 65535)}`);
+        seq.push(`brightness:${Math.floor(Math.random() * 254)}`);
+        seq.push(`saturation:${Math.floor(Math.random() * 254)}`);
+        seq.push(`sleep:500`);
+    }
+    seq.push("brightness:254");
+    seq.push("hue:34000");
+    seq.push("saturation:254");
+    return seq;
 }
 
 function sleep(ms) {
@@ -24,15 +49,14 @@ function sleep(ms) {
 }
 
 async function executeSequence() {
-    for (let arg of args) {
-        if (arg.startsWith('sleep')) {
-            console.log("Sleeping...");
-            await sleep(arg.split(':')[1]);
+    for (let seq of sequence) {
+        console.log(`executing ${seq}`);
+        if (seq.startsWith('sleep')) {
+            await sleep(seq.split(':')[1]);
         } else {
-            console.log(arg);
-            let command = arg.split(':')[0];
-            let value = arg.split(':')[1];
-            if (parseInt(value, 10)) {
+            let command = seq.split(':')[0];
+            let value = seq.split(':')[1];
+            if (!isNaN(parseInt(value, 10))) {
                 value = parseInt(value, 10);
             }
             controlLights(command, value);
